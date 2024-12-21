@@ -3,8 +3,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from .config import get_config
-
 def setup_logging(log_level: str = "INFO", log_file: Optional[Path] = None) -> None:
     """Setup basic logging configuration.
     

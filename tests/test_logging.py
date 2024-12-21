@@ -3,8 +3,6 @@ import tempfile
 from pathlib import Path
 import time
 
-import pytest
-
 from minerva.logging import setup_logging, get_logger
 
 def test_setup_logging_console():
