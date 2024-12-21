@@ -9,7 +9,8 @@ dependencies = [
     "sqlalchemy",
     "psycopg2-binary",
     "python-dotenv",
-    "pydantic"
+    "pydantic",
+    "pydantic-settings"
 ]
 
 [project.optional-dependencies]
