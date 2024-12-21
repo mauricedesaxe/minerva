@@ -3,6 +3,9 @@
 Minerva is a document processing service designed for RAG (Retrieval Augmented Generation) applications. 
 It processes documents from various sources, chunks them semantically, generates embeddings, and stores them in a PostgreSQL database for efficient retrieval.
 
+*Fun fact: Minerva is the Roman goddess of wisdom, knowledge, and the patron saint of libraries.*
+We are providing knowledge to LLMs.
+
 ## Features
 
 - Document processing from S3 storage
