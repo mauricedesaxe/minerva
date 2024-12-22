@@ -24,11 +24,25 @@ Step 3: Document Parser (The Text Extractor)
 
 Step 4: Text Chunker (The Splitter)
 - Make base chunker interface
-- Make simple recursive chunker that splits on paragraphs
-- Chunker only does ONE thing: text to chunk objects
-- Each chunk has text and metadata about position
-- Test with different text patterns
-- No embedding yet, just splitting
+- Implement two chunking strategies:
+  1. DenseChunker:
+     - Splits text into small overlapping chunks (e.g., 512 tokens with 128 token overlap)
+     - Preserves sentence boundaries
+     - Good for detailed QA
+  2. SparseChunker:
+     - Splits text by semantic boundaries (headings, sections)
+     - Keeps logical units together
+     - Good for topic-level retrieval
+- Each chunk should contain:
+  - Text content
+  - Metadata about position
+  - Parent-child relationships (sparse chunks know their dense chunks)
+  - Hierarchy level (for sparse chunks)
+- Test with:
+  - Different document structures
+  - Various heading depths
+  - Edge cases (very short/long sections)
+- Include chunk validation (min/max sizes, proper nesting)
 
 Step 5: Embedding Generator (The AI Part)
 - Make embedding interface class
