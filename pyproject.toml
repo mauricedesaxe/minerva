@@ -10,7 +10,8 @@ dependencies = [
     "psycopg2-binary",
     "python-dotenv",
     "pydantic",
-    "pydantic-settings"
+    "pydantic-settings",
+    "tiktoken"
 ]
 
 [project.optional-dependencies]
