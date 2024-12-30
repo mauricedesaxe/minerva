@@ -1,33 +1,19 @@
 import os
 from typing import List, Dict
-import boto3
 from openai import OpenAI
 import chromadb
 from dotenv import load_dotenv
 import argparse
+from s3_connection import get_s3_client, check_bucket_exists, get_file_content
 
 # Load environment variables
 load_dotenv()
 
 # Initialize clients
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    endpoint_url=os.getenv('STORAGE_URL')  # Optional - use if you have a custom endpoint
-)
+s3_client = get_s3_client()
 openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 chroma_client = chromadb.PersistentClient(path="./chroma_db")
 collection = chroma_client.get_or_create_collection("docs")
-
-def get_markdown_from_s3(bucket: str, key: str) -> str:
-    """Get markdown content from S3."""
-    try:
-        response = s3_client.get_object(Bucket=bucket, Key=key)
-        return response['Body'].read().decode('utf-8')
-    except Exception as e:
-        print(f"Error getting file {key} from S3: {str(e)}")
-        raise
 
 def split_text(text: str, chunk_size: int = 1000) -> List[str]:
     """Split text into chunks, trying to preserve markdown structure."""
@@ -61,19 +47,11 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
         print(f"Error getting embeddings: {str(e)}")
         raise
 
-def check_bucket_exists(bucket: str) -> bool:
-    """Check if S3 bucket exists."""
-    try:
-        s3_client.head_bucket(Bucket=bucket)
-        return True
-    except Exception:
-        return False
-
 def process_markdown_file(bucket: str, key: str) -> Dict:
     """Process a single markdown file."""
     try:
         # Get content from S3
-        content = get_markdown_from_s3(bucket, key)
+        content = get_file_content(bucket, key, s3_client)
         
         # Split into chunks
         chunks = split_text(content)
