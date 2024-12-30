@@ -114,11 +114,6 @@ if __name__ == "__main__":
         "file_path",
         help="Path to the markdown file in the bucket"
     )
-    parser.add_argument(
-        "--test-upload",
-        action="store_true",
-        help="Upload a test file before processing"
-    )
 
     args = parser.parse_args()
 
@@ -132,19 +127,6 @@ if __name__ == "__main__":
         print(f"Error: Bucket '{bucket}' not found or not accessible")
         print("Check your credentials and bucket name")
         exit(1)
-
-    if args.test_upload:
-        try:
-            s3_client.put_object(
-                Bucket=bucket,
-                Key=args.file_path,
-                Body="# Test Document\n\nThis is a test markdown file.",
-                ContentType='text/markdown'
-            )
-            print(f"Uploaded test file to {args.file_path}")
-        except Exception as e:
-            print(f"Could not upload test file: {str(e)}")
-            exit(1)
     
     # Process the file
     result = process_markdown_file(bucket, args.file_path)
