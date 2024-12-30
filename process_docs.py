@@ -15,25 +15,100 @@ openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 chroma_client = chromadb.PersistentClient(path="./chroma_db")
 collection = chroma_client.get_or_create_collection("docs")
 
-def split_text(text: str, chunk_size: int = 1000) -> List[str]:
-    """Split text into chunks, trying to preserve markdown structure."""
-    # Split by double newline (markdown paragraphs)
+def split_by_headings(text: str, max_size: int) -> List[str]:
+    """Split text by markdown headings (Level 1)."""
+    sections = []
+    current_section_lines = []
+    
+    for line in text.splitlines():
+        if line.startswith('#'):
+            if current_section_lines:
+                section = '\n'.join(current_section_lines)
+
+                is_small_enough = len(section) <= max_size
+                if is_small_enough:
+                    sections.append(section)
+                else:
+                    sections.extend(split_by_paragraphs(section, max_size))
+            current_section_lines = [line]
+        else:
+            current_section_lines.append(line)
+    
+    # Handle last section
+    if current_section_lines:
+        section = '\n'.join(current_section_lines)
+        is_small_enough = len(section) <= max_size
+        if is_small_enough:
+            sections.append(section)
+        else:
+            sections.extend(split_by_paragraphs(section, max_size))
+    
+    return sections
+
+def split_by_paragraphs(text: str, max_size: int) -> List[str]:
+    """Split text by paragraphs (Level 2)."""
     paragraphs = text.split('\n\n')
     chunks = []
-    current_chunk = ""
     
     for para in paragraphs:
-        if len(current_chunk) + len(para) < chunk_size:
-            current_chunk += para + "\n\n"
+        is_small_enough = len(para) <= max_size
+        if is_small_enough:
+            chunks.append(para)
+        else:
+            chunks.extend(split_by_sentences(para, max_size))
+    
+    return chunks
+
+def split_by_sentences(text: str, max_size: int) -> List[str]:
+    """Split text by sentences (Level 3)."""
+    sentence_boundaries = ['. ', '! ', '? ', '...', '.\n', '!\n', '?\n']
+    current_sentence = ""
+    sentences = []
+    
+    for char in text:
+        current_sentence += char
+
+        is_sentence_boundary = any(current_sentence.endswith(end) for end in sentence_boundaries)
+        if is_sentence_boundary:
+            is_small_enough = len(current_sentence) <= max_size
+            if is_small_enough:
+                sentences.append(current_sentence)
+            else:
+                sentences.extend(split_at_word_boundaries(current_sentence, max_size))
+            current_sentence = ""
+    
+    if current_sentence:  # Handle any remaining text
+        is_small_enough = len(current_sentence) <= max_size
+        if is_small_enough:
+            sentences.append(current_sentence)
+        else:
+            sentences.extend(split_at_word_boundaries(current_sentence, max_size))
+    
+    return sentences
+
+def split_at_word_boundaries(text: str, max_size: int) -> List[str]:
+    """Split text at word boundaries as last resort (Level 4)."""
+    chunks = []
+    current_chunk = ""
+    words = text.split()
+    
+    for word in words:
+        is_small_enough = len(current_chunk) + len(word) + 1 <= max_size
+        if is_small_enough:
+            current_chunk += word + " "
         else:
             if current_chunk:
                 chunks.append(current_chunk.strip())
-            current_chunk = para + "\n\n"
+            current_chunk = word + " "
     
     if current_chunk:
         chunks.append(current_chunk.strip())
     
     return chunks
+
+def split_text(text: str, max_chunk_size: int = 1000) -> List[str]:
+    """Split text using hierarchical chunking strategy."""
+    return split_by_headings(text, max_chunk_size)
 
 def get_embeddings(texts: List[str]) -> List[List[float]]:
     """Get embeddings from OpenAI."""
