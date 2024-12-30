@@ -61,20 +61,12 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
         print(f"Error getting embeddings: {str(e)}")
         raise
 
-def check_bucket_exists(bucket: str, create: bool = False) -> bool:
-    """Check if S3 bucket exists and optionally create it."""
+def check_bucket_exists(bucket: str) -> bool:
+    """Check if S3 bucket exists."""
     try:
         s3_client.head_bucket(Bucket=bucket)
         return True
-    except Exception: 
-        if create:
-            try:
-                s3_client.create_bucket(Bucket=bucket)
-                print(f"Created bucket: {bucket}")
-                return True
-            except Exception as e:
-                print(f"Error creating bucket {bucket}: {str(e)}")
-                return False
+    except Exception:
         return False
 
 def process_markdown_file(bucket: str, key: str) -> Dict:
