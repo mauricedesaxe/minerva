@@ -6,29 +6,21 @@ requires-python = ">=3.11"
 dependencies = [
     "openai",
     "boto3",
-    "sqlalchemy",
-    "psycopg2-binary",
     "python-dotenv",
-    "pydantic",
-    "pydantic-settings",
-    "tiktoken"
+    "tiktoken",
+    "chromadb"
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "black",
-    "isort",
-    "mypy",
-    "pytest-cov"
+    "isort"
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 88
-
-[tool.isort]
-profile = "black"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
