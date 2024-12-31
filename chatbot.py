@@ -36,7 +36,9 @@ def get_relevant_context(query: str, limit: int = 5) -> str:
         n_results=limit
     )
     
-    # Combine all relevant documents into one context string
+    for doc, dist in zip(results['documents'][0], results['distances'][0]):
+        logger.debug(f"Distance {dist:.3f}: {doc[:100]}...")
+    
     context = "\n\n".join(results['documents'][0])
     return context
 
