@@ -11,11 +11,13 @@ class Colors:
     ERROR = '\033[91m'
     RESET = '\033[0m'
     BOLD = '\033[1m'
+    CYAN = '\033[96m'
+    MAGENTA = '\033[95m'
 
 class ColoredFormatter(logging.Formatter):
     """Custom formatter with colors"""
     
-    format_str = "%(asctime)s - %(levelname)s - %(message)s"
+    format_str = "%(asctime)s - %(levelname)s - %(prefix)s%(message)s"
     
     FORMATS = {
         logging.DEBUG: Colors.HEADER + format_str + Colors.RESET,
@@ -26,6 +28,17 @@ class ColoredFormatter(logging.Formatter):
     }
 
     def format(self, record):
+        # Add prefix based on log type
+        if not hasattr(record, 'prefix'):
+            if 'embedding' in record.msg.lower():
+                record.prefix = Colors.CYAN + "[EMBED] " + Colors.RESET
+            elif any(x in record.msg.lower() for x in ['collection', 'chunk', 'document']):
+                record.prefix = Colors.MAGENTA + "[STORE] " + Colors.RESET
+            elif 'search' in record.msg.lower():
+                record.prefix = Colors.SUCCESS + "[SEARCH] " + Colors.RESET
+            else:
+                record.prefix = ""
+        
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt, datefmt="%Y-%m-%d %H:%M:%S")
         return formatter.format(record)

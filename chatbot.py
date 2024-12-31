@@ -1,19 +1,18 @@
 import os
-from typing import List, Dict
+from typing import List
 from openai import OpenAI
-import chromadb
 from dotenv import load_dotenv
 import argparse
 from logger import logger
 import logging
+from collection_manager import init_collection, check_collection_health
 
 # Load environment variables
 load_dotenv()
 
 # Initialize clients
 openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
-collection = chroma_client.get_or_create_collection("docs")
+chroma_client, collection = init_collection()
 
 def get_embeddings(text: str) -> List[float]:
     """Get embeddings from OpenAI."""
@@ -51,7 +50,7 @@ def chat_with_gpt(query: str, context: str) -> str:
         ]
         
         response = openai_client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4-turbo-preview",
             messages=messages,
             temperature=0.7,
             max_tokens=500
@@ -70,34 +69,54 @@ def main():
     if args.debug:
         logger.setLevel(logging.DEBUG)
     
-    print("Welcome to DocChat! Type 'quit' to exit.")
+    print("\n=== DocChat - Your Document Assistant ===")
     print("Loading knowledge base...")
+    
+    # Check collection health
+    health = check_collection_health(collection)
+    if not health["is_healthy"]:
+        print(f"\n⚠️  Warning: Collection not healthy - {health['error']}")
+        print("Some features may not work correctly.")
+    else:
+        doc_count = health["doc_count"]
+        if doc_count == 0:
+            print("\n📚 No documents found in collection.")
+            print("Please process some documents first using process_docs.py")
+        else:
+            print(f"\n📚 Found {doc_count} document chunks ready for chat")
+    
+    print("\nType your question or 'quit' to exit.")
+    print("----------------------------------------")
     
     while True:
         try:
             query = input("\nYou: ").strip()
             
             if query.lower() in ['quit', 'exit']:
-                print("Goodbye!")
+                print("\nGoodbye! 👋")
                 break
                 
             if not query:
                 continue
             
-            logger.debug("Getting relevant context")
+            if health["doc_count"] == 0:
+                print("\nℹ️  No documents to search through. Please add some documents first.")
+                continue
+            
+            print("\nSearching for relevant information...")
             context = get_relevant_context(query)
             
-            logger.debug("Getting GPT response")
+            print("Thinking...")
             response = chat_with_gpt(query, context)
             
             print("\nAssistant:", response)
             
         except KeyboardInterrupt:
-            print("\nGoodbye!")
+            print("\nGoodbye! 👋")
             break
         except Exception as e:
             logger.error("Error: %s", str(e))
-            print("\nSorry, something went wrong. Please try again.")
+            print("\n❌ Sorry, something went wrong. Please try again.")
 
 if __name__ == "__main__":
     main() 

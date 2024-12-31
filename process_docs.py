@@ -1,13 +1,13 @@
 import os
 from typing import List, Dict
 from openai import OpenAI
-import chromadb
 from dotenv import load_dotenv
 import argparse
 from s3_connection import get_s3_client, check_bucket_exists, get_file_content
 from splitter import split_text
 from logger import logger
 import logging
+from collection_manager import init_collection, check_document_exists
 
 # Load environment variables
 load_dotenv()
@@ -15,8 +15,7 @@ load_dotenv()
 # Initialize clients
 s3_client = get_s3_client()
 openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
-collection = chroma_client.get_or_create_collection("docs")
+chroma_client, collection = init_collection()
 
 def get_embeddings(texts: List[str]) -> List[List[float]]:
     """Get embeddings from OpenAI."""
@@ -32,10 +31,24 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
         logger.error("Failed to get embeddings: %s", str(e))
         raise
 
-def process_markdown_file(bucket: str, key: str) -> Dict:
+def process_markdown_file(bucket: str, key: str, force_reload: bool = False) -> Dict:
     """Process a single markdown file."""
     try:
         logger.info("Processing file: %s from bucket: %s", key, bucket)
+        
+        # Check if already processed
+        doc_ids = [f"{key}_{i}" for i in range(1000)]  # Check reasonable range
+        existing_docs = [id for id in doc_ids if check_document_exists(collection, id)]
+        logger.debug(f"Found {len(existing_docs)} documents")
+        
+        if existing_docs and not force_reload:
+            logger.info("File %s already processed (%d chunks). Use force_reload=True to reprocess", 
+                       key, len(existing_docs))
+            return {
+                "status": "skipped",
+                "chunks_processed": len(existing_docs),
+                "source": key
+            }
         
         # Get content from S3
         logger.debug("Fetching content from S3")
@@ -48,6 +61,11 @@ def process_markdown_file(bucket: str, key: str) -> Dict:
         
         # Get embeddings
         embeddings = get_embeddings(chunks)
+        
+        # Delete old chunks if reloading
+        if existing_docs and force_reload:
+            logger.info("Removing old chunks before reload")
+            collection.delete(ids=existing_docs)
         
         # Store in ChromaDB
         logger.debug("Storing chunks in ChromaDB")
