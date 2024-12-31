@@ -27,7 +27,7 @@ def get_embeddings(text: str) -> List[float]:
         logger.error("Failed to get embeddings: %s", str(e))
         raise
 
-def get_relevant_context(query: str, limit: int = 3) -> str:
+def get_relevant_context(query: str, limit: int = 5) -> str:
     """Get relevant documents from ChromaDB."""
     query_embedding = get_embeddings(query)
     
