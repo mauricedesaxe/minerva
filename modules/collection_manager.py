@@ -1,5 +1,6 @@
+from .logger import logger
+
 import chromadb
-from logger import logger
 
 def check_collection_health(collection) -> dict:
     """Tell if collection good or bad and why."""

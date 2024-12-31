@@ -2,7 +2,7 @@ import os
 import boto3
 from typing import Optional
 from botocore.client import BaseClient
-from logger import logger
+from .logger import logger
 
 def get_s3_client() -> BaseClient:
     """Get S3 client with credentials from environment.

@@ -3,9 +3,9 @@ from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
 import argparse
-from logger import logger
+from modules.logger import logger
 import logging
-from collection_manager import init_collection, check_collection_health
+from modules.collection_manager import init_collection, check_collection_health
 
 # Load environment variables
 load_dotenv()

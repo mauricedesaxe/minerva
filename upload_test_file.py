@@ -1,7 +1,7 @@
 import os
-from s3_connection import get_s3_client, check_bucket_exists
+from modules.s3_connection import get_s3_client, check_bucket_exists
 from dotenv import load_dotenv
-from logger import logger
+from modules.logger import logger
 
 # Load environment variables 
 load_dotenv()

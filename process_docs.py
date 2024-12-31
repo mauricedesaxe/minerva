@@ -3,11 +3,11 @@ from typing import List, Dict
 from openai import OpenAI
 from dotenv import load_dotenv
 import argparse
-from s3_connection import get_s3_client, check_bucket_exists, get_file_content
-from splitter import split_text
-from logger import logger
+from modules.s3_connection import get_s3_client, check_bucket_exists, get_file_content
+from modules.splitter import split_text
+from modules.logger import logger
 import logging
-from collection_manager import init_collection, check_document_exists
+from modules.collection_manager import init_collection, check_document_exists
 
 # Load environment variables
 load_dotenv()
