@@ -25,10 +25,10 @@ cp .env.example .env
 
 3. Process a document from S3:
 ```bash
-python process_docs.py path/to/your/doc.md
+python scripts/process_docs.py path/to/your/doc.md
 ```
 
 4. Chat with your documents:
 ```bash
-python chatbot.py
+python scripts/chatbot.py
 ```
