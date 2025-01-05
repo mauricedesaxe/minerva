@@ -46,7 +46,7 @@ class JobRepository:
         return await self.update(
             job_id,
             JobUpdate(
-                status="completed",
+                status="success",
                 completed_at=datetime.utcnow(),
                 chunks_processed=chunks_processed
             )
@@ -57,7 +57,7 @@ class JobRepository:
         return await self.update(
             job_id,
             JobUpdate(
-                status="failed",
+                status="error",
                 completed_at=datetime.utcnow(),
                 error=error
             )
