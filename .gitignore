@@ -47,3 +47,6 @@ logs/
 # ChromaDB
 chroma_db/
 test_chroma_db/
+
+# SQLite
+data/
