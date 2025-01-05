@@ -145,6 +145,19 @@ async def process_document(
                 }
             }
         )
+    
+    content = get_file_content(request.bucket, request.key, s3_client)
+    size_threshold = 5 * 1024 * 1024 # 5MB
+    if len(content) > size_threshold:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {
+                    "code": ErrorCode.INVALID_REQUEST,
+                    "message": "File size exceeds 5MB"
+                }
+            }
+        )
 
     repo = JobRepository(db)
 
