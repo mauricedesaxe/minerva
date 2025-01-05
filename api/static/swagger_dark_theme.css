@@ -1,0 +1,277 @@
+:root {
+    --background-color: #1a1a1a;
+    --secondary-bg: #2d2d2d;
+    --header-bg: #232323;
+    --text-color: #ffffff;
+    --text-color-secondary: #e2e2e2;
+    --border-color: #404040;
+    --code-bg: #2d2d2d;
+    --button-bg: #4a4a4a;
+    --method-get: #61affe;
+    --method-post: #49cc90;
+    --method-delete: #f93e3e;
+    --method-put: #fca130;
+    --tab-bg: #2d2d2d;
+}
+
+/* Base styles */
+body, .swagger-ui {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* API title and description */
+.swagger-ui .info .title,
+.swagger-ui .info .title small.version-stamp,
+.swagger-ui .info .title small pre.version,
+.swagger-ui .info p,
+.swagger-ui .info .description,
+.swagger-ui .info .base-url,
+.swagger-ui .info a,
+.swagger-ui .info li,
+.swagger-ui .info table,
+.swagger-ui .info > div {
+    color: var(--text-color-secondary) !important;
+}
+
+/* Headers and sections */
+.swagger-ui .opblock-tag-section {
+    background-color: var(--background-color);
+}
+
+/* Tab containers and headers */
+.swagger-ui .tab,
+.swagger-ui .tab li,
+.swagger-ui .tab-header,
+.swagger-ui .tab-item,
+.swagger-ui .tabitem,
+.swagger-ui .parameters-container,
+.swagger-ui .parameters-col_description {
+    background: var(--secondary-bg) !important;
+    color: var(--text-color-secondary) !important;
+}
+
+/* Response sections */
+.swagger-ui .responses-wrapper,
+.swagger-ui .responses-inner,
+.swagger-ui .response-col_description__inner,
+.swagger-ui .response__cell {
+    background: var(--secondary-bg) !important;
+}
+
+/* Parameters section */
+.swagger-ui .parameters-container .parameters,
+.swagger-ui .parameters-container .parameters tr,
+.swagger-ui .parameters-container .parameters td,
+.swagger-ui .parameters-container .parameters th {
+    background: var(--secondary-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Light gray backgrounds fix */
+.swagger-ui .opblock .opblock-section-header,
+.swagger-ui .opblock .opblock-section-header > label,
+.swagger-ui .opblock-section-header {
+    background: var(--secondary-bg) !important;
+    color: var(--text-color-secondary) !important;
+}
+
+/* Tab headers */
+.swagger-ui .parameters__type,
+.swagger-ui .parameters-col_name {
+    background: var(--secondary-bg) !important;
+}
+
+/* Response headers */
+.swagger-ui .responses-inner > h4,
+.swagger-ui .responses-inner > h5 {
+    background: var(--secondary-bg) !important;
+    color: var(--text-color-secondary) !important;
+}
+
+/* Try it out button */
+.swagger-ui .try-out__btn {
+    background-color: var(--button-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Parameters table */
+.swagger-ui .parameters-container th,
+.swagger-ui .parameters-container td,
+.swagger-ui .parameters-container td p,
+.swagger-ui .parameters-container td.parameters-col_description > *:not(div),
+.swagger-ui .parameters-container .parameter__name,
+.swagger-ui .parameters-container .parameter__type,
+.swagger-ui .parameters-container .parameter__deprecated,
+.swagger-ui .parameters-container .parameter__in,
+.swagger-ui .parameters-container .parameter__enum {
+    color: var(--text-color-secondary) !important;
+    background: var(--secondary-bg) !important;
+}
+
+/* Response section */
+.swagger-ui .responses-table th,
+.swagger-ui .responses-table td,
+.swagger-ui .responses-table td p {
+    color: var(--text-color-secondary) !important;
+    background: var(--secondary-bg) !important;
+}
+
+/* Headers and Text */
+.swagger-ui .info .title,
+.swagger-ui .info .description,
+.swagger-ui .scheme-container,
+.swagger-ui .opblock-tag,
+.swagger-ui .opblock .opblock-summary-description,
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5,
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description {
+    color: var(--text-color-secondary) !important;
+}
+
+/* Operation blocks */
+.swagger-ui .opblock {
+    background-color: var(--code-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Models */
+.swagger-ui section.models {
+    border: 1px solid var(--border-color);
+    background: var(--code-bg);
+}
+
+.swagger-ui section.models.is-open h4 {
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-color-secondary) !important;
+}
+
+.swagger-ui .model-box {
+    background-color: var(--code-bg);
+}
+
+/* Additional fixes for light text */
+.swagger-ui .opblock-summary-path,
+.swagger-ui .opblock-summary-description,
+.swagger-ui .opblock-title_normal p,
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .response-col_description__inner div.markdown,
+.swagger-ui .response-col_description__inner div.renderedMarkdown {
+    color: var(--text-color-secondary) !important;
+}
+
+/* Links section */
+.swagger-ui td.response-col_links,
+.swagger-ui .response-col_links {
+    color: var(--text-color-secondary) !important;
+    background: var(--secondary-bg) !important;
+}
+
+/* Fix for gray backgrounds in tabs */
+.swagger-ui .tab-item.active h4 span,
+.swagger-ui .tab-item.active h4,
+.swagger-ui .opblock .opblock-section-header h4,
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5 {
+    color: var(--text-color-secondary) !important;
+    background: var(--secondary-bg) !important;
+}
+
+/* Fix for parameter backgrounds */
+.swagger-ui .parameters__type__input {
+    background: var(--secondary-bg) !important;
+}
+
+/* JSON Editor and Example areas */
+.swagger-ui .body-param__example {
+    background-color: var(--code-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Code editor */
+.swagger-ui textarea,
+.swagger-ui input[type="text"] {
+    background-color: var(--code-bg) !important;
+    color: var(--text-color-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Example value sections */
+.swagger-ui .example {
+    background-color: var(--code-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.swagger-ui .example-value {
+    background-color: var(--code-bg) !important;
+}
+
+/* Microlight syntax highlighting */
+.microlight {
+    background-color: var(--code-bg) !important;
+    color: var(--text-color-secondary) !important;
+    font-family: monospace;
+    padding: 10px !important;
+}
+
+/* JSON specific syntax colors */
+.microlight .string { color: #a8ff60 !important; }  /* Strings */
+.microlight .number { color: #ff9d00 !important; }  /* Numbers */
+.microlight .boolean { color: #ff628c !important; } /* Booleans */
+.microlight .null { color: #ff628c !important; }    /* Null */
+.microlight .key { color: #5ccfe6 !important; }     /* Keys */
+.microlight .punctuation { color: #ffee80 !important; } /* Brackets, commas */
+
+/* Execute button area */
+.swagger-ui .execute-wrapper {
+    background-color: var(--secondary-bg) !important;
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.swagger-ui .btn.execute {
+    background-color: var(--method-post) !important;
+    border-color: var(--border-color) !important;
+    color: white !important;
+}
+
+.swagger-ui .btn.btn-clear {
+    background-color: var(--button-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Request body editor */
+.swagger-ui .opblock-body pre.body-param__example {
+    background-color: var(--code-bg) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.swagger-ui div.body-param__example {
+    background-color: var(--code-bg) !important;
+}
+
+/* Code blocks */
+.swagger-ui pre {
+    background-color: var(--code-bg) !important;
+    color: var(--text-color-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* Cancel button */
+.swagger-ui .btn.cancel {
+    background-color: var(--button-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Input fields */
+.swagger-ui select,
+.swagger-ui input {
+    background-color: var(--code-bg) !important;
+    color: var(--text-color-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+} 

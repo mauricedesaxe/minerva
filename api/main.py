@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security.api_key import APIKeyHeader
 import os
 from dotenv import load_dotenv
@@ -7,6 +7,8 @@ from typing import Annotated
 import sys
 from pathlib import Path
 from contextlib import asynccontextmanager
+from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.docs import get_swagger_ui_html
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
@@ -32,13 +34,35 @@ async def lifespan(app: FastAPI):
     # Shutdown: Clean up resources if needed
     logger.info("Application shutting down")
 
-# Initialize FastAPI app with lifespan
+# Initialize FastAPI app with lifespan and custom docs
 app = FastAPI(
     title="Minerva API",
     description="Document processing and semantic search API",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None  # Disable default docs
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="api/static"), name="static")
+
+# Custom docs with dark theme
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    swagger_ui = get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=app.title + " - Swagger UI",
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
+        swagger_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
+    )
+    body = swagger_ui.body.decode()
+    css_url = app.url_path_for("static", path="swagger_dark_theme.css")
+    body = body.replace(
+        "</head>",
+        f'<link rel="stylesheet" href="{css_url}">\n</head>'
+    )
+    return HTMLResponse(body)
 
 # API Key security
 API_KEY_NAME = "X-API-Key"
