@@ -6,23 +6,38 @@ from dotenv import load_dotenv
 from typing import Annotated
 import sys
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
-from modules.logger import setup_logger
+from modules.logger import setup_logger, logger
 from api.routers import documents, search
 
 # Load environment variables
 load_dotenv()
 
-# Initialize logger
-logger = setup_logger(__name__)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Set up logging
+    if app.debug:
+        os.environ["LOG_LEVEL"] = "DEBUG"
+    
+    # Reinitialize logger
+    global logger
+    logger = setup_logger("minerva")
+    logger.debug("Application starting up in debug mode")
+    
+    yield  # Server is running and handling requests
+    
+    # Shutdown: Clean up resources if needed
+    logger.info("Application shutting down")
 
-# Initialize FastAPI app
+# Initialize FastAPI app with lifespan
 app = FastAPI(
     title="Minerva API",
     description="Document processing and semantic search API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # API Key security
