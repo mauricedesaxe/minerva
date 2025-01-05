@@ -26,6 +26,15 @@ class ProcessRequest(BaseModel):
     key: str
     force_reload: bool = False
 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "bucket": "spacestation-labs-companion",
+                "key": "test_doc.md",
+                "force_reload": False
+            }
+        }
+
 class FileInfo(BaseModel):
     bucket: str
     key: str
