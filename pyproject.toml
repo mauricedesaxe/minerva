@@ -4,19 +4,18 @@ version = "0.1.0"
 description = "Document processing service for RAG applications"
 requires-python = ">=3.11"
 dependencies = [
-    "openai",
-    "boto3",
-    "python-dotenv",
-    "tiktoken",
-    "chromadb",
-    "fastapi>=0.104.0",
-    "uvicorn>=0.24.0",
-    "pydantic>=2.5.0",
-    "python-multipart>=0.0.6",
-    "sqlalchemy>=2.0.0",
-    "alembic>=1.12.0",
-    "aiosqlite>=0.19.0",
-    "greenlet>=3.0.0"
+    "aiosqlite==0.20.0",
+    "alembic==1.14.0",
+    "boto3==1.35.92",
+    "chromadb==0.6.1",
+    "fastapi==0.115.6",
+    "greenlet==3.1.1",
+    "openai==1.59.3",
+    "pydantic==2.10.4",
+    "python-dotenv==1.0.1",
+    "python-multipart==0.0.20",
+    "tiktoken==0.8.0",
+    "uvicorn==0.34.0",
 ]
 
 [project.optional-dependencies]
