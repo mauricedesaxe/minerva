@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from ..database import get_db, AsyncSessionLocal
 from ..repositories.job_repository import JobRepository
 from ..schemas.job import JobCreate, JobResponse
+from ..schemas.error import ErrorCode
 from modules.s3_connection import get_s3_client, check_bucket_exists, get_file_content
 from modules.splitter import split_text
 from modules.collection_manager import init_collection, check_document_exists
@@ -51,7 +52,15 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
         return [data.embedding for data in response.data]
     except Exception as e:
         logger.error("Failed to get embeddings: %s", str(e))
-        raise
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": {
+                    "code": ErrorCode.PROCESSING_ERROR,
+                    "message": f"Failed to get embeddings: {str(e)}"
+                }
+            }
+        )
 
 async def process_document_task(job_id: str, bucket: str, key: str, force_reload: bool = False):
     # Create a new database session specifically for this background task
@@ -120,7 +129,7 @@ async def process_document(
             status_code=400,
             detail={
                 "error": {
-                    "code": "invalid_request",
+                    "code": ErrorCode.INVALID_REQUEST,
                     "message": "Only markdown (.md) files are supported"
                 }
             }
@@ -131,7 +140,7 @@ async def process_document(
             status_code=400,
             detail={
                 "error": {
-                    "code": "invalid_request",
+                    "code": ErrorCode.INVALID_REQUEST,
                     "message": f"Bucket '{request.bucket}' not found or not accessible"
                 }
             }
@@ -176,7 +185,7 @@ async def get_job_status(
             status_code=404,
             detail={
                 "error": {
-                    "code": "not_found",
+                    "code": ErrorCode.NOT_FOUND,
                     "message": f"Job {job_id} not found"
                 }
             }

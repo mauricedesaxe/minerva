@@ -5,6 +5,7 @@ from openai import OpenAI
 import os
 from modules.collection_manager import init_collection
 from modules.logger import logger
+from ..schemas.error import ErrorCode
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
 
@@ -62,7 +63,7 @@ def get_embeddings(text: str) -> List[float]:
             status_code=500,
             detail={
                 "error": {
-                    "code": "processing_error",
+                    "code": ErrorCode.PROCESSING_ERROR,
                     "message": f"Failed to get embeddings: {str(e)}"
                 }
             }
@@ -102,7 +103,7 @@ async def search_documents(request: SearchRequest):
             status_code=500,
             detail={
                 "error": {
-                    "code": "server_error",
+                    "code": ErrorCode.PROCESSING_ERROR,
                     "message": f"Search failed: {str(e)}"
                 }
             }

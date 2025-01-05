@@ -9,11 +9,13 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
+from sqlalchemy.exc import SQLAlchemyError
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
 from modules.logger import setup_logger, logger
 from api.routers import documents, search
+from api.schemas.error import ErrorCode, ErrorResponse
 
 # Load environment variables
 load_dotenv()
@@ -72,16 +74,55 @@ async def verify_api_key(api_key: Annotated[str | None, Depends(api_key_header)]
     if api_key != os.getenv("API_KEY"):
         raise HTTPException(
             status_code=401,
-            detail={"error": {"code": "auth_failed", "message": "Invalid API key"}}
+            detail={
+                "error": {
+                    "code": ErrorCode.AUTH_FAILED,
+                    "message": "Invalid API key"
+                }
+            }
         )
     return api_key
 
 # Global error handler
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
+    # If detail is already formatted as our error response, use it directly
+    if isinstance(exc.detail, dict) and "error" in exc.detail:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=exc.detail
+        )
+    
+    # Otherwise, format it according to our schema
+    error_code = ErrorCode.INVALID_REQUEST
+    if exc.status_code == 401:
+        error_code = ErrorCode.AUTH_FAILED
+    elif exc.status_code == 404:
+        error_code = ErrorCode.NOT_FOUND
+    elif exc.status_code == 500:
+        error_code = ErrorCode.SERVER_ERROR
+    
     return JSONResponse(
         status_code=exc.status_code,
-        content=exc.detail
+        content=ErrorResponse(
+            error={
+                "code": error_code,
+                "message": str(exc.detail)
+            }
+        ).model_dump()
+    )
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
+    logger.error(f"Database error: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content=ErrorResponse(
+            error={
+                "code": ErrorCode.SERVER_ERROR,
+                "message": "Database error occurred"
+            }
+        ).model_dump()
     )
 
 @app.exception_handler(Exception)
@@ -89,12 +130,12 @@ async def general_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled error: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={
-            "error": {
-                "code": "server_error",
+        content=ErrorResponse(
+            error={
+                "code": ErrorCode.SERVER_ERROR,
                 "message": "An unexpected error occurred"
             }
-        }
+        ).model_dump()
     )
 
 # Health check endpoint
