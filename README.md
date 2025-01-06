@@ -10,6 +10,8 @@ Smart document assistant that helps you vectorize documents from S3.
 
 ## Quick Start
 
+Use for development:
+
 1. Set up environment:
 ```bash
 uv venv
@@ -37,3 +39,26 @@ python scripts/chatbot.py
 ```bash
 uvicorn api.main:app --reload --log-level debug
 ```
+
+## Docker
+
+### Using Docker Compose (Recommended)
+
+The usual Docker Compose commands:
+
+```bash
+# Build and start the services
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+```
+
+The Docker setup includes:
+- Automatic health checks
+- Volume persistence for SQLite database
+- Resource limits and memory management
+- Environment variable configuration via .env file
