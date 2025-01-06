@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
+    networks:
+      - proxy
     env_file:
       - .env
     volumes:
@@ -28,4 +28,9 @@ services:
 
 volumes:
   minerva_data:
-    driver: local 
+    driver: local
+
+networks:
+  proxy:
+    external: true
+    name: proxy 
