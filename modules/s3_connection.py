@@ -1,8 +1,9 @@
 import os
 import boto3
-from typing import Optional
+from typing import Optional, Any
 from botocore.client import BaseClient
 from .logger import logger
+import botocore.exceptions
 
 def get_s3_client() -> BaseClient:
     """Get S3 client with credentials from environment.
@@ -61,13 +62,13 @@ def check_bucket_exists(bucket: str, client: Optional[BaseClient] = None) -> boo
         logger.warning("Bucket not accessible: %s (%s)", bucket, str(e))
         return False
 
-def get_file_content(bucket: str, key: str, client: Optional[BaseClient] = None) -> str:
+def get_file_content(bucket: str, key: str, s3: Any) -> str:
     """Get file content from S3 bucket.
     
     Args:
         bucket: Bucket name
         key: File key/path in bucket
-        client: Optional S3 client (creates new one if not provided)
+        s3: Optional S3 client (creates new one if not provided)
         
     Returns:
         str: File content as string
@@ -76,13 +77,11 @@ def get_file_content(bucket: str, key: str, client: Optional[BaseClient] = None)
         Exception: If file cannot be retrieved
     """
     logger.debug("Getting file content - bucket: %s, key: %s", bucket, key)
-    s3 = client or get_s3_client()
     try:
         response = s3.get_object(Bucket=bucket, Key=key)
-        content = response['Body'].read().decode('utf-8')
-        logger.debug("Successfully retrieved file content")
-        return content
-    except Exception as e:
+        return response['Body'].read().decode('utf-8')
+    except botocore.exceptions.ClientError as e:
+        # Log the error but don't wrap it in a generic Exception
         error_msg = f"Failed to get file {key} from bucket {bucket}: {str(e)}"
         logger.error(error_msg)
-        raise Exception(error_msg) 
+        raise  # Re-raise the original ClientError 

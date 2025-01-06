@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.middleware.cors import CORSMiddleware
+import botocore.exceptions
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
@@ -132,6 +133,40 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
             error={
                 "code": ErrorCode.SERVER_ERROR,
                 "message": "Database error occurred"
+            }
+        ).model_dump()
+    )
+
+@app.exception_handler(botocore.exceptions.ClientError)
+async def s3_client_error_handler(request: Request, exc: botocore.exceptions.ClientError):
+    logger.error(f"S3 error occurred: {str(exc)}")
+    error_code_from_s3 = exc.response.get("Error", {}).get("Code", "")
+    if error_code_from_s3 == "NoSuchKey":
+        return JSONResponse(
+            status_code=404,
+            content=ErrorResponse(
+                error={
+                    "code": ErrorCode.NOT_FOUND,
+                    "message": "Requested file not found in S3 bucket."
+                }
+            ).model_dump()
+        )
+    if error_code_from_s3 == "AccessDenied":
+        return JSONResponse(
+            status_code=403,
+            content=ErrorResponse(
+                error={
+                    "code": ErrorCode.AUTH_FAILED,
+                    "message": "Access denied to S3 bucket."
+                }
+            ).model_dump()
+        )
+    return JSONResponse(
+        status_code=500,
+        content=ErrorResponse(
+            error={
+                "code": ErrorCode.SERVER_ERROR,
+                "message": "A general S3 error occurred."
             }
         ).model_dump()
     )
