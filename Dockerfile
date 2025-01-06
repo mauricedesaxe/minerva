@@ -51,6 +51,9 @@ RUN mkdir -p /home/appuser/data
 COPY --from=builder --chown=appuser:appuser /home/appuser/venv /home/appuser/venv
 COPY --chown=appuser:appuser . .
 
+# Make entrypoint script executable
+RUN chmod +x /home/appuser/docker-entrypoint.sh
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
@@ -59,5 +62,5 @@ ENV PATH="/home/appuser/venv/bin:$PATH"
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Command to run the application
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Use the entrypoint script
+ENTRYPOINT ["/home/appuser/docker-entrypoint.sh"] 
