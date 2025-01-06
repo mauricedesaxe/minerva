@@ -214,3 +214,24 @@ async def get_job_status(
         chunks_processed=job.chunks_processed,
         error=job.error
     ) 
+
+@router.get("/jobs", response_model=list[JobResponse])
+async def list_jobs(
+    db: AsyncSession = Depends(get_db)
+):
+    repo = JobRepository(db)
+    jobs = await repo.list_all()
+    
+    return [
+        JobResponse(
+            job_id=job.job_id,
+            status=job.status, 
+            created_at=job.created_at,
+            completed_at=job.completed_at,
+            bucket=job.bucket,
+            key=job.file_key,
+            chunks_processed=job.chunks_processed,
+            error=job.error
+        )
+        for job in jobs
+    ]

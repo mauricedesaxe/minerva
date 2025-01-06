@@ -23,6 +23,12 @@ class JobRepository:
         await self.session.flush()
         return job
 
+    async def list_all(self) -> list[Job]:
+        """List all jobs."""
+        query = select(Job)
+        result = await self.session.execute(query)
+        return result.scalars().all()
+
     async def get(self, job_id: str) -> Job | None:
         """Get a job by ID."""
         query = select(Job).where(Job.job_id == job_id)
