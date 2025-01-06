@@ -2,6 +2,7 @@
 name = "minerva"
 version = "0.1.0"
 description = "Document processing service for RAG applications"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "aiosqlite==0.20.0",
