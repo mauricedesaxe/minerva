@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.docs import get_swagger_ui_html
 from sqlalchemy.exc import SQLAlchemyError
+from fastapi.middleware.cors import CORSMiddleware
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
@@ -43,6 +44,16 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
     docs_url=None  # Disable default docs
+)
+
+# TODO: Restrict to specific origins (maybe make it configurable)
+# Allow any origin for now
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files
