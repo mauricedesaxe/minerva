@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    networks:
-      - proxy
     env_file:
       - .env
     volumes:
@@ -28,9 +26,4 @@ services:
 
 volumes:
   minerva_data:
-    driver: local
-
-networks:
-  proxy:
-    external: true
-    name: proxy 
+    driver: local 
