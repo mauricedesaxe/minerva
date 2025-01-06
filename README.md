@@ -32,3 +32,8 @@ python scripts/process_docs.py path/to/your/doc.md
 ```bash
 python scripts/chatbot.py
 ```
+
+5. Turn on the server:
+```bash
+uvicorn api.main:app --reload --log-level debug
+```
