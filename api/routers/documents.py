@@ -56,6 +56,14 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
         largest_chunk = max(texts, key=len)
         logger.debug("First chunk sample (first 100 chars): %s", texts[0][:100])
         logger.debug("Largest chunk sample (first 100 chars): %s", largest_chunk[:100])
+        
+        # Validate input
+        if not texts:
+            raise ValueError("Empty text list provided")
+        if any(not isinstance(t, str) for t in texts):
+            raise ValueError("All chunks must be strings")
+        if any(len(t.strip()) == 0 for t in texts):
+            raise ValueError("Empty chunks detected")
             
         # Log API request details
         logger.debug("Making OpenAI API request with model: text-embedding-3-large")
