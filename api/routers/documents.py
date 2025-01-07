@@ -43,7 +43,25 @@ class FileInfo(BaseModel):
 def get_embeddings(texts: list[str]) -> list[list[float]]:
     """Get embeddings from OpenAI."""
     try:
-        logger.info("Getting embeddings for %d chunks", len(texts))
+        # Log chunk statistics
+        logger.debug("Chunk statistics:")
+        logger.debug("Number of chunks: %d", len(texts))
+        logger.debug("Chunk sizes: min=%d, max=%d, avg=%d",
+            min(len(t) for t in texts),
+            max(len(t) for t in texts),
+            sum(len(t) for t in texts) // len(texts)
+        )
+        
+        # Log sample of first chunk and largest chunk
+        largest_chunk = max(texts, key=len)
+        logger.debug("First chunk sample (first 100 chars): %s", texts[0][:100])
+        logger.debug("Largest chunk sample (first 100 chars): %s", largest_chunk[:100])
+            
+        # Log API request details
+        logger.debug("Making OpenAI API request with model: text-embedding-3-large")
+        logger.debug("Request payload size: %d bytes", 
+            sum(len(t.encode('utf-8')) for t in texts)
+        )
         response = openai_client.embeddings.create(
             model="text-embedding-3-large",
             input=texts
@@ -52,6 +70,9 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
         return [data.embedding for data in response.data]
     except Exception as e:
         logger.error("Failed to get embeddings: %s", str(e))
+        # Log more error details if available
+        if hasattr(e, 'response'):
+            logger.error("API Response details: %s", e.response)
         raise HTTPException(
             status_code=500,
             detail={
@@ -85,6 +106,8 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
             # Get content from S3
             logger.debug("Fetching content from S3")
             content = get_file_content(bucket, key, s3_client)
+            logger.debug("Content sample (first 500 chars): %s", content[:500])
+            logger.debug("Content length: %d bytes", len(content))
             
             # Split into chunks
             logger.debug("Splitting content into chunks")
