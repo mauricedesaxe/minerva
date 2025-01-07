@@ -122,6 +122,14 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
             chunks = split_text(content)
             logger.info("Split into %d chunks", len(chunks))
             
+            # Add chunk validation before embedding
+            empty_chunks = [i for i, chunk in enumerate(chunks) if not chunk.strip()]
+            if empty_chunks:
+                logger.error("Found %d empty chunks at indices: %s", 
+                            len(empty_chunks), 
+                            empty_chunks[:10])  # Show first 10 indices
+                raise ValueError(f"Document contains {len(empty_chunks)} empty chunks")
+
             # Get embeddings
             embeddings = get_embeddings(chunks)
             
