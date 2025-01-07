@@ -16,26 +16,28 @@ def split_by_headings(text: str, max_size: int) -> List[str]:
     for line in text.splitlines():
         if line.startswith('#'):
             if current_section_lines:
-                section = '\n'.join(current_section_lines)
-                is_small_enough = len(section) <= max_size
-                if is_small_enough:
-                    sections.append(section)
-                else:
-                    sections.extend(split_by_paragraphs(section, max_size))
+                section = '\n'.join(current_section_lines).strip()
+                if section:
+                    is_small_enough = len(section) <= max_size
+                    if is_small_enough:
+                        sections.append(section)
+                    else:
+                        sections.extend(split_by_paragraphs(section, max_size))
             current_section_lines = [line]
         else:
             current_section_lines.append(line)
     
     # Handle last section
     if current_section_lines:
-        section = '\n'.join(current_section_lines)
-        is_small_enough = len(section) <= max_size
-        if is_small_enough:
-            sections.append(section)
-        else:
-            sections.extend(split_by_paragraphs(section, max_size))
+        section = '\n'.join(current_section_lines).strip()
+        if section:
+            is_small_enough = len(section) <= max_size
+            if is_small_enough:
+                sections.append(section)
+            else:
+                sections.extend(split_by_paragraphs(section, max_size))
     
-    return sections
+    return [s for s in sections if s.strip()]
 
 def split_by_paragraphs(text: str, max_size: int) -> List[str]:
     """Split text by paragraphs (Level 2).
@@ -47,7 +49,8 @@ def split_by_paragraphs(text: str, max_size: int) -> List[str]:
     Returns:
         List[str]: List of text chunks split by paragraphs
     """
-    paragraphs = text.split('\n\n')
+    paragraphs = [p.strip() for p in text.split('\n\n')]
+    paragraphs = [p for p in paragraphs if p]
     chunks = []
     
     for para in paragraphs:
