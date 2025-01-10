@@ -30,7 +30,7 @@ This shouldn't be treated as a hard roadmap. It's more of a wishlist.
 - [ ] add reranking for search results
 - [ ] add similarity threshold for search results
 - [ ] add direct embedding generation endpoint (you pass in text, you get back embeddings)
-- [ ] add more metadata? (e.g. line of chunk in text, tags, etc.)
+- [ ] add more metadata? (e.g. tags, etc.)
 - [ ] add query destructuring for search or query destructuring API endpoint
 - [ ] add chunk context retrieval (get surrounding chunks)
 - [ ] add backup/restore functionality for vector store
