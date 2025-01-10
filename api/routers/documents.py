@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-
+from datetime import datetime
 from ..database import get_db, AsyncSessionLocal
 from ..repositories.job_repository import JobRepository
 from ..schemas.job import JobCreate, JobResponse
@@ -144,7 +144,7 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
                 documents=chunks,
                 embeddings=embeddings,
                 ids=[f"{key}_{i}" for i in range(len(chunks))],
-                metadatas=[{"source": key, "chunk": i} for i in range(len(chunks))]
+                metadatas=[{"source": key, "chunk": i, "embedded_at": datetime.utcnow().isoformat()} for i in range(len(chunks))]
             )
             
             logger.info("Successfully processed file %s", key)
