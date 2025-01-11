@@ -142,3 +142,53 @@ def split_at_word_boundaries(text: str, max_size: int) -> List[str]:
         chunks.append(current_chunk.strip())
     
     return chunks
+
+
+def get_suggested_chunk_size(embedding_model: str) -> int:
+    """Get suggested chunk size based on embedding model.
+    
+    Common models and their limits:
+    OpenAI:
+    - text-embedding-3-large: 8191 max, 3072d vectors
+    - text-embedding-3-small: 8191 max, 1536d vectors
+    - text-embedding-ada-002: 8191 max, 1536d vectors
+    
+    Ollama:
+    - bge-m3: 2048 max, 1024d vectors
+    - nomic-embed-text: 8192 max, 768d vectors
+    - all-minilm: 512 max, 384d vectors
+    
+    HuggingFace:
+    - e5-large: 512 max, 1024d vectors
+    - bge-large: 512 max, 1024d vectors
+    - all-mpnet-base-v2: 512 max, 768d vectors
+    - all-MiniLM-L6-v2: 256 max, 384d vectors
+    
+    We use ~1/3 of max tokens because:
+    1. Better search precision
+    2. Safer content handling
+    3. Room for model updates
+    4. Avoid context window edge cases
+    """
+    model_chunks = {
+        # OpenAI
+        "text-embedding-3-large": 3000,
+        "text-embedding-3-small": 2000,
+        "text-embedding-ada-002": 2000,
+        
+        # Ollama
+        "bge-m3": 1000,
+        "nomic-embed-text": 2000,
+        "all-minilm": 200,
+        
+        # HuggingFace
+        "e5-large": 200,
+        "bge-large": 200,
+        "all-mpnet-base-v2": 200,
+        "all-minilm-l6-v2": 100,
+        
+        # Default
+        "default": 1000
+    }
+    
+    return model_chunks.get(embedding_model, model_chunks["default"])
