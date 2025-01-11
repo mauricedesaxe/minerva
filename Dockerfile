@@ -29,7 +29,8 @@ RUN uv venv /home/appuser/venv && \
     python-dotenv==1.0.1 \
     python-multipart==0.0.20 \
     tiktoken==0.8.0 \
-    uvicorn==0.34.0
+    uvicorn==0.34.0 \
+    ollama==0.3.3
 
 # Final stage
 FROM python:3.11-slim
