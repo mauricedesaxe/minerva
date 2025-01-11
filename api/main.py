@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.security.api_key import APIKeyHeader
 import os
-from dotenv import load_dotenv
 from typing import Annotated
 import sys
 from pathlib import Path
@@ -12,15 +11,13 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.middleware.cors import CORSMiddleware
 import botocore.exceptions
+from modules.env import API_KEY
 
 # Add parent directory to path so we can import from modules
 sys.path.append(str(Path(__file__).parent.parent))
 from modules.logger import setup_logger, logger
 from api.routers import documents, search
 from api.schemas.error import ErrorCode, ErrorResponse
-
-# Load environment variables
-load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -83,7 +80,7 @@ API_KEY_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 async def verify_api_key(api_key: Annotated[str | None, Depends(api_key_header)]):
-    if api_key != os.getenv("API_KEY"):
+    if api_key != API_KEY:
         raise HTTPException(
             status_code=401,
             detail={

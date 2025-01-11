@@ -1,8 +1,7 @@
 import logging
 import sys
 from typing import Optional
-import os
-
+from modules.env import LOG_LEVEL
 # ANSI color codes
 class Colors:
     HEADER = '\033[95m'
@@ -57,7 +56,7 @@ def setup_logger(name: str = "minerva", level: Optional[int] = None) -> logging.
     logger = logging.getLogger(name)
     
     # Check environment variable first, then fallback to parameter or INFO
-    env_level = os.getenv("LOG_LEVEL", "").upper()
+    env_level = LOG_LEVEL.upper()
     if env_level in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
         level = getattr(logging, env_level)
     

@@ -1,17 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List
-from openai import OpenAI
-import os
 from modules.collection_manager import init_collection
 from modules.logger import logger
 from ..schemas.error import ErrorCode
-from functools import lru_cache
+from modules.embeddings import get_query_embedding
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
 
 # Initialize clients
-openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 chroma_client, collection = init_collection()
 
 class SearchRequest(BaseModel):
@@ -51,28 +48,6 @@ class SearchResponse(BaseModel):
                 ]
             }
         }
-
-# Cache common query embeddings (uses very little RAM, big speed win)
-@lru_cache(maxsize=1000)
-def get_query_embedding(text: str) -> List[float]:
-    """Get single query embedding from OpenAI with cache."""
-    try:
-        response = openai_client.embeddings.create(
-            model="text-embedding-3-large",
-            input=[text]
-        )
-        return response.data[0].embedding
-    except Exception as e:
-        logger.error("Failed to get query embedding: %s", str(e))
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "code": ErrorCode.PROCESSING_ERROR,
-                    "message": f"Failed to get query embedding: {str(e)}"
-                }
-            }
-        )
 
 @router.post("", response_model=SearchResponse)
 async def search_documents(request: SearchRequest):

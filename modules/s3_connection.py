@@ -1,9 +1,9 @@
-import os
 import boto3
 from typing import Optional, Any
 from botocore.client import BaseClient
 from .logger import logger
 import botocore.exceptions
+from modules.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, STORAGE_URL
 
 def get_s3_client() -> BaseClient:
     """Get S3 client with credentials from environment.
@@ -18,15 +18,15 @@ def get_s3_client() -> BaseClient:
     logger.debug("Setting up S3 client")
     
     # Check required env vars exist
-    access_key = os.getenv('AWS_ACCESS_KEY_ID')
-    secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    access_key = AWS_ACCESS_KEY_ID
+    secret_key = AWS_SECRET_ACCESS_KEY
     
     if not access_key or not secret_key:
         logger.error("AWS credentials not found in environment")
         raise ValueError("AWS credentials not found in environment")
         
     try:
-        endpoint_url = os.getenv('STORAGE_URL')
+        endpoint_url = STORAGE_URL
         if endpoint_url:
             logger.debug("Using custom endpoint: %s", endpoint_url)
             
