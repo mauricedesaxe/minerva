@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from modules.logger import logger
 from api.schemas.error import ErrorCode
 from modules.env import OPENAI_API_KEY
+import time
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -13,10 +14,14 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY)
 def get_query_embedding(text: str) -> List[float]:
     """Get single query embedding from OpenAI with cache."""
     try:
+        start_time = time.time()
+        logger.debug("Getting query embedding for text: %s", text)
         response = openai_client.embeddings.create(
             model="text-embedding-3-large",
             input=[text]
         )
+        end_time = time.time()
+        logger.debug("Query embedding retrieved in %s seconds", end_time - start_time)
         return response.data[0].embedding
     except Exception as e:
         logger.error("Failed to get query embedding: %s", str(e))
