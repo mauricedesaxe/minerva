@@ -76,6 +76,21 @@ def get_embeddings(text: str) -> List[float]:
 
 @router.post("", response_model=SearchResponse)
 async def search_documents(request: SearchRequest):
+    """Search documents using semantic search with optional keyword-based reranking.
+    
+    Flow:
+    1. Convert query to embedding using OpenAI API
+    2. Find similar documents using ChromaDB vector search
+    3. If rerank=True:
+       - Get more initial results (3x requested limit, max 20)
+       - Score documents using both semantic and keyword matching
+       - Keyword score = % of query words present in document
+       - Final score = (0.7 * semantic_score) + (0.3 * keyword_score)
+       - Return top K reranked results
+    4. If rerank=False:
+       - Return raw semantic search results
+       - Similarity scores based on vector distances only
+    """
     try:
         # Only use initial_limit if reranking
         initial_limit = min(request.limit * 3, 20) if request.rerank else request.limit

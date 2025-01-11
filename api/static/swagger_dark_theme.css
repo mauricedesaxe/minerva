@@ -3,7 +3,7 @@
     --secondary-bg: #2d2d2d;
     --header-bg: #232323;
     --text-color: #ffffff;
-    --text-color-secondary: #e2e2e2;
+    --text-color-secondary: #ffffff;
     --border-color: #404040;
     --code-bg: #2d2d2d;
     --button-bg: #4a4a4a;
@@ -274,4 +274,42 @@ body, .swagger-ui {
     background-color: var(--code-bg) !important;
     color: var(--text-color-secondary) !important;
     border: 1px solid var(--border-color) !important;
+}
+
+/* Make description text more visible */
+.swagger-ui .markdown p, 
+.swagger-ui .markdown pre,
+.swagger-ui .renderedMarkdown p,
+.swagger-ui .renderedMarkdown pre {
+    color: var(--text-color) !important;
+}
+
+/* Ensure code examples are readable */
+.swagger-ui pre,
+.swagger-ui code {
+    color: var(--text-color) !important;
+    background-color: var(--code-bg) !important;
+}
+
+/* Make parameter descriptions more visible */
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui .parameter__deprecated,
+.swagger-ui .parameter__in {
+    color: var(--text-color) !important;
+}
+
+/* Fix documentation text contrast */
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .opblock-external-docs-wrapper p,
+.swagger-ui .opblock-title_normal p,
+.swagger-ui .renderedMarkdown p {
+    color: #ffffff !important;
+    font-weight: 400;
+}
+
+/* Fix list item contrast */
+.swagger-ui .opblock-description-wrapper li,
+.swagger-ui .renderedMarkdown li {
+    color: #ffffff !important;
 } 
