@@ -13,7 +13,7 @@ from modules.collection_manager import init_collection, check_document_exists
 from modules.logger import logger
 from modules.env import OPENAI_API_KEY
 from modules.embeddings import get_document_chunk_embeddings
-
+import time
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 s3_client = get_s3_client()
 chroma_client, collection = init_collection()
@@ -38,7 +38,24 @@ class FileInfo(BaseModel):
     bucket: str
     key: str
 
+def log_performance(duration: float, context: str = "", failed: bool = False):
+    """Log performance based on duration thresholds.
+    
+    Args:
+        duration: Time in seconds
+        context: Additional context for the log message
+        failed: Whether this was a failed task
+    """
+    status = "failed" if failed else "successful"
+    context = f" for {context}" if context else ""
+    
+    if duration > 1:
+        logger.warning(f"PERF: ⚠️ Task {status}{context} - time concerning ({duration:.2f}s)")
+    else:
+        logger.info(f"PERF: Task {status}{context} - normal time ({duration:.2f}s)")
+
 async def process_document_task(job_id: str, bucket: str, key: str, force_reload: bool = False):
+    task_start = time.time()
     # Create a new database session specifically for this background task
     async with AsyncSessionLocal() as db:
         repo = JobRepository(db)
@@ -48,44 +65,58 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
                 raise Exception(f"Bucket '{bucket}' not found or not accessible")
 
             # Check if already processed
-            doc_ids = [f"{key}_{i}" for i in range(1000)]  # Check reasonable range
+            check_start = time.time()
+            doc_ids = [f"{key}_{i}" for i in range(1000)]
             existing_docs = [id for id in doc_ids if check_document_exists(collection, id)]
             logger.debug(f"Found {len(existing_docs)} documents")
+            log_performance(time.time() - check_start, "document existence check")
             
             if existing_docs and not force_reload:
                 logger.info("File %s already processed (%d chunks)", key, len(existing_docs))
                 await repo.complete_job(job_id, chunks_processed=len(existing_docs))
                 await db.commit()
+                log_performance(time.time() - task_start, "already processed file")
                 return
 
             # Get content from S3
+            s3_start = time.time()
             logger.debug("Fetching content from S3")
             content = get_file_content(bucket, key, s3_client)
             logger.debug("Content sample (first 500 chars): %s", content[:500])
             logger.debug("Content length: %d bytes", len(content))
+            log_performance(time.time() - s3_start, "S3 content fetch")
             
             # Split into chunks
+            split_start = time.time()
             logger.debug("Splitting content into chunks")
             chunks = split_text(content)
             logger.info("Split into %d chunks", len(chunks))
+            log_performance(time.time() - split_start, "text splitting")
             
-            # Add chunk validation before embedding
+            # Chunk validation
+            validation_start = time.time()
             empty_chunks = [i for i, chunk in enumerate(chunks) if not chunk.strip()]
             if empty_chunks:
                 logger.error("Found %d empty chunks at indices: %s", 
                             len(empty_chunks), 
-                            empty_chunks[:10])  # Show first 10 indices
+                            empty_chunks[:10])
                 raise ValueError(f"Document contains {len(empty_chunks)} empty chunks")
+            log_performance(time.time() - validation_start, "chunk validation")
 
             # Get embeddings
+            embedding_start = time.time()
             embeddings = get_document_chunk_embeddings(chunks)
+            log_performance(time.time() - embedding_start, "embedding generation")
             
             # Delete old chunks if reloading
             if existing_docs and force_reload:
+                delete_start = time.time()
                 logger.info("Removing old chunks before reload")
                 collection.delete(ids=existing_docs)
+                log_performance(time.time() - delete_start, "deleting old chunks")
             
             # Store in ChromaDB
+            store_start = time.time()
             logger.debug("Storing chunks in ChromaDB")
             collection.add(
                 documents=chunks,
@@ -93,16 +124,19 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
                 ids=[f"{key}_{i}" for i in range(len(chunks))],
                 metadatas=[{"source": key, "chunk": i, "embedded_at": datetime.utcnow().isoformat()} for i in range(len(chunks))]
             )
+            log_performance(time.time() - store_start, "ChromaDB storage")
             
             logger.info("Successfully processed file %s", key)
             await repo.complete_job(job_id, chunks_processed=len(chunks))
             await db.commit()
+            log_performance(time.time() - task_start, f"processing {key}")
 
         except Exception as e:
             error_msg = f"Failed to process file {key}: {str(e)}"
             logger.error(error_msg)
             await repo.fail_job(job_id, error_msg)
             await db.commit()
+            log_performance(time.time() - task_start, f"processing {key}", failed=True)
 
 @router.post("/process", response_model=JobResponse)
 async def process_document(
