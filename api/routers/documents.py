@@ -29,8 +29,8 @@ class ProcessRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "bucket": "spacestation-labs-companion",
-                "key": "test_doc.md",
-                "force_reload": False
+                "key": "the_falcon.md",
+                "force_reload": True
             }
         }
 

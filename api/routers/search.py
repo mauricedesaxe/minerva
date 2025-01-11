@@ -19,8 +19,8 @@ class SearchRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "query": "Timing the fundraising cycle",
-                "limit": 3,
+                "query": "For spacecraft components like solar panels that have a high surface area to mass ratio, why does SpaceX recommend focusing more on acoustic testing rather than random vibration testing? What's the physics behind this recommendation?",
+                "limit": 5,
                 "rerank": True
             }
         }
