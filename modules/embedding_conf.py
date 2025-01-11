@@ -19,6 +19,30 @@ MODEL_CONFIGS = {
         "chunk_size": 1000,
         "dimensions": 1024,
     },
+    "nomic-embed-text": {
+        "provider": "ollama",
+        "max_tokens": 8192,
+        "chunk_size": 2048,
+        "dimensions": 768,
+    },
+    "mxbai-embed-large": {
+        "provider": "ollama",
+        "max_tokens": 8192,
+        "chunk_size": 2048,
+        "dimensions": 1024,
+    },
+    "snowflake-arctic-embed": {
+        "provider": "ollama",
+        "max_tokens": 8192,
+        "chunk_size": 2048,
+        "dimensions": 768,
+    },
+    "all-minilm": {
+        "provider": "ollama",
+        "max_tokens": 8192,
+        "chunk_size": 2048,
+        "dimensions": 384,
+    },
 }
 
 if EMBEDDING_MODEL not in MODEL_CONFIGS:
