@@ -8,8 +8,9 @@ services:
     env_file:
       - .env
     volumes:
-      # Persist the SQLite database
+      # Persist both SQLite and ChromaDB data
       - minerva_data:/home/appuser/data
+      - minerva_chroma:/home/appuser/chroma_db
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -26,4 +27,6 @@ services:
 
 volumes:
   minerva_data:
+    driver: local
+  minerva_chroma:
     driver: local 

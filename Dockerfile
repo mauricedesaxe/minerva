@@ -45,8 +45,9 @@ RUN useradd --create-home appuser
 USER appuser
 WORKDIR /home/appuser
 
-# Create data directory with proper permissions
+# Create data directories with proper permissions
 RUN mkdir -p /home/appuser/data
+RUN mkdir -p /home/appuser/chroma_db
 
 # Copy virtual environment and application code
 COPY --from=builder --chown=appuser:appuser /home/appuser/venv /home/appuser/venv
