@@ -1,5 +1,23 @@
 from typing import List
 
+def split_text(text: str, max_chunk_size: int = 1000) -> List[str]:
+    """Split text using hierarchical chunking strategy.
+    
+    Main entry point for text splitting. Uses a hierarchical approach:
+    1. Split by headings
+    2. Split by paragraphs if needed
+    3. Split by sentences if needed
+    4. Split by words as last resort
+    
+    Args:
+        text: Text content to split
+        max_chunk_size: Maximum size for each chunk (default: 1000)
+        
+    Returns:
+        List[str]: List of text chunks
+    """
+    return split_by_headings(text, max_chunk_size)
+
 def split_by_headings(text: str, max_size: int) -> List[str]:
     """Split text by markdown headings (Level 1).
     
@@ -124,21 +142,3 @@ def split_at_word_boundaries(text: str, max_size: int) -> List[str]:
         chunks.append(current_chunk.strip())
     
     return chunks
-
-def split_text(text: str, max_chunk_size: int = 1000) -> List[str]:
-    """Split text using hierarchical chunking strategy.
-    
-    Main entry point for text splitting. Uses a hierarchical approach:
-    1. Split by headings
-    2. Split by paragraphs if needed
-    3. Split by sentences if needed
-    4. Split by words as last resort
-    
-    Args:
-        text: Text content to split
-        max_chunk_size: Maximum size for each chunk (default: 1000)
-        
-    Returns:
-        List[str]: List of text chunks
-    """
-    return split_by_headings(text, max_chunk_size) 
