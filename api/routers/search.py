@@ -6,6 +6,7 @@ import os
 from modules.collection_manager import init_collection
 from modules.logger import logger
 from ..schemas.error import ErrorCode
+from functools import lru_cache
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
 
@@ -49,8 +50,10 @@ class SearchResponse(BaseModel):
             }
         }
 
+# Cache common query embeddings (uses very little RAM, big speed win)
+@lru_cache(maxsize=1000)
 def get_embeddings(text: str) -> List[float]:
-    """Get embeddings from OpenAI."""
+    """Get embeddings from OpenAI with cache."""
     try:
         response = openai_client.embeddings.create(
             model="text-embedding-3-large",
