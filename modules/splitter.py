@@ -1,6 +1,7 @@
 from typing import List
+from modules.embedding_conf import ACTIVE_CONFIG
 
-def split_text(text: str, max_chunk_size: int = 1000) -> List[str]:
+def split_text(text: str, max_chunk_size: int = None) -> List[str]:
     """Split text using hierarchical chunking strategy.
     
     Main entry point for text splitting. Uses a hierarchical approach:
@@ -8,15 +9,10 @@ def split_text(text: str, max_chunk_size: int = 1000) -> List[str]:
     2. Split by paragraphs if needed
     3. Split by sentences if needed
     4. Split by words as last resort
-    
-    Args:
-        text: Text content to split
-        max_chunk_size: Maximum size for each chunk (default: 1000)
-        
-    Returns:
-        List[str]: List of text chunks
     """
-    return split_by_headings(text, max_chunk_size)
+    # Use config chunk size if none provided
+    chunk_size = max_chunk_size or ACTIVE_CONFIG["chunk_size"]
+    return split_by_headings(text, chunk_size)
 
 def split_by_headings(text: str, max_size: int) -> List[str]:
     """Split text by markdown headings (Level 1).
@@ -142,53 +138,3 @@ def split_at_word_boundaries(text: str, max_size: int) -> List[str]:
         chunks.append(current_chunk.strip())
     
     return chunks
-
-
-def get_suggested_chunk_size(embedding_model: str) -> int:
-    """Get suggested chunk size based on embedding model.
-    
-    Common models and their limits:
-    OpenAI:
-    - text-embedding-3-large: 8191 max, 3072d vectors
-    - text-embedding-3-small: 8191 max, 1536d vectors
-    - text-embedding-ada-002: 8191 max, 1536d vectors
-    
-    Ollama:
-    - bge-m3: 2048 max, 1024d vectors
-    - nomic-embed-text: 8192 max, 768d vectors
-    - all-minilm: 512 max, 384d vectors
-    
-    HuggingFace:
-    - e5-large: 512 max, 1024d vectors
-    - bge-large: 512 max, 1024d vectors
-    - all-mpnet-base-v2: 512 max, 768d vectors
-    - all-MiniLM-L6-v2: 256 max, 384d vectors
-    
-    We use ~1/3 of max tokens because:
-    1. Better search precision
-    2. Safer content handling
-    3. Room for model updates
-    4. Avoid context window edge cases
-    """
-    model_chunks = {
-        # OpenAI
-        "text-embedding-3-large": 3000,
-        "text-embedding-3-small": 2000,
-        "text-embedding-ada-002": 2000,
-        
-        # Ollama
-        "bge-m3": 1000,
-        "nomic-embed-text": 2000,
-        "all-minilm": 200,
-        
-        # HuggingFace
-        "e5-large": 200,
-        "bge-large": 200,
-        "all-mpnet-base-v2": 200,
-        "all-minilm-l6-v2": 100,
-        
-        # Default
-        "default": 1000
-    }
-    
-    return model_chunks.get(embedding_model, model_chunks["default"])

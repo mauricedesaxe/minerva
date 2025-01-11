@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from modules.logger import logger
 from api.schemas.error import ErrorCode
 from modules.env import OPENAI_API_KEY
+from modules.embedding_conf import CURRENT_MODEL, ACTIVE_CONFIG
 import time
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -17,7 +18,7 @@ def get_query_embedding(text: str) -> List[float]:
         start_time = time.time()
         logger.debug("Getting query embedding for text: %s", text)
         response = openai_client.embeddings.create(
-            model="text-embedding-3-large",
+            model=CURRENT_MODEL,
             input=[text]
         )
         end_time = time.time()
@@ -60,13 +61,18 @@ def get_document_chunk_embeddings(texts: list[str]) -> list[list[float]]:
         if any(len(t.strip()) == 0 for t in texts):
             raise ValueError("Empty chunks detected")
             
+        # Add config-based validation
+        max_tokens = ACTIVE_CONFIG["max_tokens"]
+        if any(len(t) > max_tokens for t in texts):
+            raise ValueError(f"Chunk too large for model {CURRENT_MODEL}")
+            
         # Log API request details
-        logger.debug("Making OpenAI API request with model: text-embedding-3-large")
+        logger.debug("Making OpenAI API request with model: %s", CURRENT_MODEL)
         logger.debug("Request payload size: %d bytes", 
             sum(len(t.encode('utf-8')) for t in texts)
         )
         response = openai_client.embeddings.create(
-            model="text-embedding-3-large",
+            model=CURRENT_MODEL,
             input=texts
         )
         logger.debug("Successfully got embeddings")
