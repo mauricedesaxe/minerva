@@ -14,6 +14,7 @@ from modules.logger import logger
 from modules.env import OPENAI_API_KEY
 from modules.embeddings import get_document_chunk_embeddings
 import time
+from typing import List
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 s3_client = get_s3_client()
 chroma_client, collection = init_collection()
@@ -38,6 +39,12 @@ class FileInfo(BaseModel):
     bucket: str
     key: str
 
+class DocumentStats(BaseModel):
+    document_id: str
+    source: str
+    chunk_count: int
+    embedded_at: datetime
+    
 def log_performance(duration: float, context: str = "", failed: bool = False):
     """Log performance based on duration thresholds.
     
@@ -255,3 +262,42 @@ async def list_jobs(
         )
         for job in jobs
     ]
+
+@router.get("/stats", response_model=List[DocumentStats])
+async def get_document_stats():
+    """Get statistics about processed documents in the collection."""
+    try:
+        # Get all documents from collection
+        results = collection.get(
+            include=['metadatas']
+        )
+        
+        if not results or not results['metadatas']:
+            return []
+        
+        # Group chunks by source document
+        doc_stats = {}
+        for metadata in results['metadatas']:
+            source = metadata['source']
+            if source not in doc_stats:
+                doc_stats[source] = {
+                    'document_id': source,
+                    'source': source,
+                    'chunk_count': 0,
+                    'embedded_at': datetime.fromisoformat(metadata['embedded_at'])
+                }
+            doc_stats[source]['chunk_count'] += 1
+        
+        return list(doc_stats.values())
+        
+    except Exception as e:
+        logger.error(f"Failed to get document stats: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": {
+                    "code": ErrorCode.INTERNAL_ERROR,
+                    "message": "Failed to retrieve document statistics"
+                }
+            }
+        )
