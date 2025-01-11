@@ -30,6 +30,14 @@ async def lifespan(app: FastAPI):
     logger = setup_logger("minerva")
     logger.debug("Application starting up in debug mode")
     
+    # Test embedding provider
+    from modules.embeddings import test_embedding_provider
+    try:
+        test_embedding_provider()
+        logger.info("Successfully validated embedding provider")
+    except Exception as e:
+        raise RuntimeError("Failed to validate embedding provider") from e
+    
     yield  # Server is running and handling requests
     
     # Shutdown: Clean up resources if needed
