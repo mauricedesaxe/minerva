@@ -54,8 +54,8 @@ class SearchResponse(BaseModel):
 
 # Cache common query embeddings (uses very little RAM, big speed win)
 @lru_cache(maxsize=1000)
-def get_embeddings(text: str) -> List[float]:
-    """Get embeddings from OpenAI with cache."""
+def get_query_embedding(text: str) -> List[float]:
+    """Get single query embedding from OpenAI with cache."""
     try:
         response = openai_client.embeddings.create(
             model="text-embedding-3-large",
@@ -63,13 +63,13 @@ def get_embeddings(text: str) -> List[float]:
         )
         return response.data[0].embedding
     except Exception as e:
-        logger.error("Failed to get embeddings: %s", str(e))
+        logger.error("Failed to get query embedding: %s", str(e))
         raise HTTPException(
             status_code=500,
             detail={
                 "error": {
                     "code": ErrorCode.PROCESSING_ERROR,
-                    "message": f"Failed to get embeddings: {str(e)}"
+                    "message": f"Failed to get query embedding: {str(e)}"
                 }
             }
         )
@@ -96,7 +96,7 @@ async def search_documents(request: SearchRequest):
         initial_limit = min(request.limit * 3, 20) if request.rerank else request.limit
         logger.debug(f"Using initial limit of {initial_limit} for query: {request.query}")
         
-        query_embedding = get_embeddings(request.query)
+        query_embedding = get_query_embedding(request.query)
         logger.debug(f"Got embeddings of length {len(query_embedding)}")
         
         results = collection.query(

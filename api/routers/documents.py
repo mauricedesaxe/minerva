@@ -40,8 +40,8 @@ class FileInfo(BaseModel):
     bucket: str
     key: str
 
-def get_embeddings(texts: list[str]) -> list[list[float]]:
-    """Get embeddings from OpenAI."""
+def get_document_chunk_embeddings(texts: list[str]) -> list[list[float]]:
+    """Get embeddings for multiple document chunks from OpenAI."""
     try:
         # Log chunk statistics
         logger.debug("Chunk statistics:")
@@ -131,7 +131,7 @@ async def process_document_task(job_id: str, bucket: str, key: str, force_reload
                 raise ValueError(f"Document contains {len(empty_chunks)} empty chunks")
 
             # Get embeddings
-            embeddings = get_embeddings(chunks)
+            embeddings = get_document_chunk_embeddings(chunks)
             
             # Delete old chunks if reloading
             if existing_docs and force_reload:
