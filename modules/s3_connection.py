@@ -4,6 +4,7 @@ from botocore.client import BaseClient
 from .logger import logger
 import botocore.exceptions
 from modules.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, STORAGE_URL
+import urllib.parse
 
 def get_s3_client() -> BaseClient:
     """Get S3 client with credentials from environment.
@@ -67,7 +68,7 @@ def get_file_content(bucket: str, key: str, s3: Any) -> str:
     
     Args:
         bucket: Bucket name
-        key: File key/path in bucket
+        key: File key/path in bucket (URL encoded)
         s3: Optional S3 client (creates new one if not provided)
         
     Returns:
@@ -76,12 +77,13 @@ def get_file_content(bucket: str, key: str, s3: Any) -> str:
     Raises:
         Exception: If file cannot be retrieved
     """
-    logger.debug("Getting file content - bucket: %s, key: %s", bucket, key)
+    # Decode URL encoded key before using with boto3
+    decoded_key = urllib.parse.unquote_plus(key)
+    logger.debug("Getting file content - bucket: %s, key: %s", bucket, decoded_key)
     try:
-        response = s3.get_object(Bucket=bucket, Key=key)
+        response = s3.get_object(Bucket=bucket, Key=decoded_key)
         return response['Body'].read().decode('utf-8')
     except botocore.exceptions.ClientError as e:
-        # Log the error but don't wrap it in a generic Exception
-        error_msg = f"Failed to get file {key} from bucket {bucket}: {str(e)}"
+        error_msg = f"Failed to get file {decoded_key} from bucket {bucket}: {str(e)}"
         logger.error(error_msg)
-        raise  # Re-raise the original ClientError 
+        raise  # Re-raise the original ClientError
