@@ -19,7 +19,7 @@ class SearchRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "query": "For spacecraft components like solar panels that have a high surface area to mass ratio, why does SpaceX recommend focusing more on acoustic testing rather than random vibration testing? What's the physics behind this recommendation?",
+                "query": "What were the circumstances that led M. Charles Myriel to become a priest after returning from Italy? What role did the French Revolution play in his transformation?",
                 "limit": 5,
                 "rerank": True
             }
@@ -81,18 +81,22 @@ async def search_documents(request: SearchRequest):
         logger.debug(f"Raw query returned {len(results['documents'][0])} results")
 
         if not request.rerank:
-            # Just return semantic search results
+            # Normalize distances to 0-1 range first
+            max_dist = max(results['distances'][0])
+            min_dist = min(results['distances'][0])
+            normalized_distances = [(d - min_dist) / (max_dist - min_dist) for d in results['distances'][0]]
+            
+            # Then convert to similarities
             search_results = [
                 SearchResult(
                     text=doc,
                     metadata=meta,
-                    # Clamp similarity between 0 and 1
-                    similarity=max(0.0, min(1.0, 1 - dist))
+                    similarity=1 - norm_dist  # Now this will be between 0 and 1
                 )
-                for doc, meta, dist in zip(
+                for doc, meta, norm_dist in zip(
                     results['documents'][0],
                     results['metadatas'][0],
-                    results['distances'][0]
+                    normalized_distances
                 )
             ]
             logger.debug("Skipping reranking as rerank=False")
@@ -112,7 +116,16 @@ async def search_documents(request: SearchRequest):
             logger.debug(f"Document keyword score: {score:.3f} - First 50 chars: {doc[:50]}...")
         
         # Rest same as before but with simpler scoring
-        semantic_scores = [max(0.0, min(1.0, 1 - dist)) for dist in results['distances'][0]]
+        logger.debug(f"Raw distances: {[f'{dist:.3f}' for dist in results['distances'][0]]}")
+        
+        # Normalize distances to 0-1 range
+        max_dist = max(results['distances'][0])
+        min_dist = min(results['distances'][0])
+        normalized_distances = [(d - min_dist) / (max_dist - min_dist) for d in results['distances'][0]]
+        
+        # Convert normalized distances to similarities
+        semantic_scores = [1 - dist for dist in normalized_distances]
+        logger.debug(f"Normalized distances: {[f'{dist:.3f}' for dist in normalized_distances]}")
         logger.debug(f"Semantic scores: {[f'{score:.3f}' for score in semantic_scores]}")
         
         final_scores = [

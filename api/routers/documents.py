@@ -30,7 +30,7 @@ class ProcessRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "bucket": "spacestation-labs-companion",
-                "key": "the_falcon.md",
+                "key": "les_miserables.md",
                 "force_reload": True
             }
         }
