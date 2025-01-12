@@ -44,7 +44,13 @@ uvicorn api.main:app --reload --log-level debug
 
 ### Using Docker Compose (Recommended)
 
-The usual Docker Compose commands:
+1. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your credentials
+```
+
+2. Use Docker Compose to start the service:
 
 ```bash
 # Build and start the services
@@ -59,6 +65,6 @@ docker compose down
 
 The Docker setup includes:
 - Automatic health checks
-- Volume persistence for SQLite database
+- Volume persistence for SQLite and ChromaDB databases
 - Resource limits and memory management
 - Environment variable configuration via .env file
