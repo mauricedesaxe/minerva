@@ -86,7 +86,8 @@ async def search_documents(request: SearchRequest):
                 SearchResult(
                     text=doc,
                     metadata=meta,
-                    similarity=1 - dist
+                    # Clamp similarity between 0 and 1
+                    similarity=max(0.0, min(1.0, 1 - dist))
                 )
                 for doc, meta, dist in zip(
                     results['documents'][0],
@@ -111,7 +112,7 @@ async def search_documents(request: SearchRequest):
             logger.debug(f"Document keyword score: {score:.3f} - First 50 chars: {doc[:50]}...")
         
         # Rest same as before but with simpler scoring
-        semantic_scores = [1 - dist for dist in results['distances'][0]]
+        semantic_scores = [max(0.0, min(1.0, 1 - dist)) for dist in results['distances'][0]]
         logger.debug(f"Semantic scores: {[f'{score:.3f}' for score in semantic_scores]}")
         
         final_scores = [
