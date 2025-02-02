@@ -238,9 +238,32 @@ This is where reranking comes in. When you set `rerank=true` in your search, her
    - A keyword score (30% weight): What percentage of your query words appear in the chunk
 3. We combine these scores and pick the top (5 in this case) results.
 
+## Why you might not want to use OpenAI
+
+I personally like OpenAI's models, but there are a few key reasons why you might not want to use them:
+* latency to their servers
+* privacy concerns
+* rate limits
+* cost at scale
+
+Embedding when processing documents and when doing search will be so much faster if the LLM that does embeddings is on the same machine, or at least in the same data center as your application that requests embeddings.
+
+You may have data that you simply don’t want, or due to compliance you legally can’t, have on third party servers.
+A self-hosted LLM coupled with the fact that Minerva itself is self-hosted gets you out of a pickle here.
+
+OpenAI also has its rate limits which, in maybe rare cases, may not be enough for you.
+And it does have to ask for a $ amount that makes it worthwhile for them too to offer the service.
+Which can be pricey at scale.
+
+These are all cases where self-hosting LLMs / embedding models can come in handy.
+I’ve seen this called MLOps in the industry.
+But don’t imagine it’s some crazy new thing, it’s mostly normal Dev Ops.
+
+Still, I think most of you won’t have these trade-offs so I’d suggest using a provider like OpenAI or Anthropic because it’s just easier.
+If you do have this trade-offs, [contact me](https://alexlazar.dev/) and I’ll see if I can nudge you in the right direction.
+
 ## TODO Remaining outline to write
 
-* why you might not want to use openAI (privacy, latency to their servers, etc)
 * how to set up minerva with local models with ollama
 * 
 
