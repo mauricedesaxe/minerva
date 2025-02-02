@@ -57,7 +57,7 @@ The Docker setup includes:
 - Resource limits and memory management
 - Environment variable configuration via .env file
 
-## What the fuck is RAG?
+## What is RAG?
 
 RAG = retrieval augmented generation.
 
