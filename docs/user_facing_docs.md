@@ -226,7 +226,17 @@ Reranking is disabled by default.
 
 ## How we do reranking and why it can be useful
 
-TODO
+Remember earlier when I said semantic search looks for meaning instead of exact words? Well, sometimes that's not enough.
+
+Let's say you're searching through a technical document. A pure semantic search might return chunks that miss the perfect passage containing the keyword you're looking for.
+
+This is where reranking comes in. When you set `rerank=true` in your search, here's what happens:
+
+1. First, we cast a wider net. Instead of just getting your requested number of results (let's say 5), we get 3x that amount (15), but max 20 results.
+2. For each result, we calculate two scores:
+   - A semantic score (70% weight): How close the meaning is based on vector similarity
+   - A keyword score (30% weight): What percentage of your query words appear in the chunk
+3. We combine these scores and pick the top (5 in this case) results.
 
 ## TODO Remaining outline to write
 
