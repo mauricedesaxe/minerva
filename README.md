@@ -108,7 +108,7 @@ And that’s because you are vectorizing the pieces of text and then comparing t
 
 A vector is a set of coordinates (sort of) in a database that map to concepts.
 This illustration should help you visualize things and you might already have an idea of how RAG works now.
-![](vectoried_concepts_illustration.png)<!-- {"width":346} -->
+![](/docs/images/vectoried_concepts_illustration.png)<!-- {"width":346} -->
 
 So you get the user query, vectorize it (also called embedding) and turn it into coordinates.
 You use these to look through your database to find other similar data points.
