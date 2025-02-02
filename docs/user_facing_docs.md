@@ -262,12 +262,8 @@ But don’t imagine it’s some crazy new thing, it’s mostly normal Dev Ops.
 Still, I think most of you won’t have these trade-offs so I’d suggest using a provider like OpenAI or Anthropic because it’s just easier.
 If you do have this trade-offs, [contact me](https://alexlazar.dev/) and I’ll see if I can nudge you in the right direction.
 
-## TODO Remaining outline to write
+## TODO: Topics I want to cover in our docs, but haven't yet
 
 * how to set up minerva with local models with ollama
-* 
-
-I’ve been saying it for a few weeks now, but getting an LLM to provide a correct answer is a context optimization problem most of the time.
-
-* how we will do query destructuring and why it’s useful
+* how to do query destructuring and why it’s useful
 * performance benchmarks (how fast can we process a file, how fast can we provide a response, where we use caching) 
